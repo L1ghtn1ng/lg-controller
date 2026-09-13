@@ -1,0 +1,73 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lgtv-controller"
+version = "0.1.0"
+description = "Local, certificate-pinned web controller for an LG webOS TV"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.14"
+dependencies = [
+    "aiohttp==3.14.3",
+    "aiowebostv==0.10.0",
+    "flasgo==0.9.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "pytest-asyncio==1.4.0",
+    "pytest-cov==7.1.0",
+    "ruff==0.16.6",
+    "ty==0.0.79",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lgtv_controller"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers --cov=lgtv_controller --cov-branch --cov-report=term-missing"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+target-version = "py314"
+line-length = 130
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "COM812",
+    "CPY001",
+    "D203",
+    "D213",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/lgtv_controller/app.py" = ["C901", "PLR0915"]
+"tests/**/*.py" = [
+    "ANN401",
+    "D102",
+    "D103",
+    "D107",
+    "PLR2004",
+    "S101",
+    "S108",
+    "SLF001",
+    "TC003",
+]
+
+[tool.ruff.format]
+indent-style = "space"
+quote-style = "double"

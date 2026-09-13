@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/app.css?v={{ asset_version }}">
+    <script src="/static/app.js?v={{ asset_version }}" defer></script>
+</head>
+<body data-tv-host="{{ tv_host }}">
+    <main class="shell">
+        <header class="hero">
+            <div>
+                <p class="eyebrow">Local control surface</p>
+                <h1>LG webOS Controller</h1>
+                <p class="subtitle">Certificate-pinned control for <code>{{ tv_host }}</code></p>
+            </div>
+            <div class="connection-summary" aria-live="polite">
+                <span id="status-dot" class="status-dot" aria-hidden="true"></span>
+                <div>
+                    <strong id="connection-label">Checking controller</strong>
+                    <span id="connection-detail">Waiting for local status</span>
+                </div>
+            </div>
+        </header>
+
+        <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
+        <p id="error" class="notice notice-error" role="alert" hidden></p>
+
+        <section class="toolbar" aria-label="Connection controls">
+            <button id="pair-button" class="button button-primary" type="button">Pair TV</button>
+            <button id="connect-button" class="button" type="button">Connect</button>
+            <button id="disconnect-button" class="button" type="button">Disconnect</button>
+            <button id="wake-button" class="button" type="button">Wake TV</button>
+            <button id="unpair-button" class="button button-quiet" type="button">Forget pairing</button>
+        </section>
+
+        <section class="status-grid" aria-label="TV status">
+            <article class="metric">
+                <span>Power</span>
+                <strong id="power-value">Unknown</strong>
+            </article>
+            <article class="metric">
+                <span>Current app</span>
+                <strong id="app-value">Unknown</strong>
+            </article>
+            <article class="metric">
+                <span>Volume</span>
+                <strong id="volume-value">Unknown</strong>
+            </article>
+            <article class="metric">
+                <span>webOS software</span>
+                <strong id="software-value">Unknown</strong>
+            </article>
+            <article class="metric">
+                <span>Channel</span>
+                <strong id="channel-value">Unknown</strong>
+            </article>
+            <article class="metric">
+                <span>Sound output</span>
+                <strong id="sound-output-value">Unknown</strong>
+            </article>
+        </section>
+
+        <div class="control-grid">
+            <section class="panel remote-panel" aria-labelledby="remote-title">
+                <div class="panel-heading">
+                    <div>
+                        <p class="eyebrow">Navigation</p>
+                        <h2 id="remote-title">Remote</h2>
+                    </div>
+                    <button
+                        class="power-button"
+                        type="button"
+                        data-command="power_off"
+                        data-requires-connection
+                    >Power off</button>
+                </div>
+
+                <div class="quick-row">
+                    <button type="button" data-command="home" data-requires-connection>Home</button>
+                    <button type="button" data-command="back" data-requires-connection>Back</button>
+                    <button type="button" data-command="exit" data-requires-connection>Exit</button>
+                </div>
+
+                <div class="dpad" aria-label="Directional controls">
+                    <button class="dpad-up" type="button" data-command="up" data-requires-connection aria-label="Up">↑</button>
+                    <button class="dpad-left" type="button" data-command="left" data-requires-connection aria-label="Left">←</button>
+                    <button class="dpad-enter" type="button" data-command="enter" data-requires-connection>OK</button>
+                    <button class="dpad-right" type="button" data-command="right" data-requires-connection aria-label="Right">→</button>
+                    <button class="dpad-down" type="button" data-command="down" data-requires-connection aria-label="Down">↓</button>
+                </div>
+
+                <div class="color-row" aria-label="Colour keys">
+                    <button class="color-key color-red" type="button" data-command="red" data-requires-connection aria-label="Red key"><span aria-hidden="true">●</span></button>
+                    <button class="color-key color-green" type="button" data-command="green" data-requires-connection aria-label="Green key"><span aria-hidden="true">●</span></button>
+                    <button class="color-key color-yellow" type="button" data-command="yellow" data-requires-connection aria-label="Yellow key"><span aria-hidden="true">●</span></button>
+                    <button class="color-key color-blue" type="button" data-command="blue" data-requires-connection aria-label="Blue key"><span aria-hidden="true">●</span></button>
+                </div>
+
+                <div class="numeric-grid" aria-label="Number keys">
+                    <button type="button" data-command="digit_1" data-requires-connection>1</button>
+                    <button type="button" data-command="digit_2" data-requires-connection>2</button>
+                    <button type="button" data-command="digit_3" data-requires-connection>3</button>
+                    <button type="button" data-command="digit_4" data-requires-connection>4</button>
+                    <button type="button" data-command="digit_5" data-requires-connection>5</button>
+                    <button type="button" data-command="digit_6" data-requires-connection>6</button>
+                    <button type="button" data-command="digit_7" data-requires-connection>7</button>
+                    <button type="button" data-command="digit_8" data-requires-connection>8</button>
+                    <button type="button" data-command="digit_9" data-requires-connection>9</button>
+                    <button type="button" data-command="asterisk" data-requires-connection aria-label="Asterisk">∗</button>
+                    <button type="button" data-command="digit_0" data-requires-connection>0</button>
+                    <button type="button" data-command="dash" data-requires-connection aria-label="Dash">—</button>
+                </div>
+
+                <div class="paired-controls">
+                    <div class="button-stack" aria-label="Volume controls">
+                        <span>Volume</span>
+                        <button type="button" data-command="volume_up" data-requires-connection>+</button>
+                        <button id="mute-button" type="button" data-requires-connection>Mute</button>
+                        <button type="button" data-command="volume_down" data-requires-connection>−</button>
+                    </div>
+                    <div class="button-stack" aria-label="Channel controls">
+                        <span>Channel</span>
+                        <button type="button" data-command="channel_up" data-requires-connection>+</button>
+                        <button type="button" data-command="channel_down" data-requires-connection>−</button>
+                    </div>
+                </div>
+
+                <label class="volume-slider" for="volume-slider">
+                    <span>Set volume</span>
+                    <input id="volume-slider" type="range" min="0" max="100" value="0" data-requires-connection>
+                    <output id="volume-output" for="volume-slider">0</output>
+                </label>
+
+                <div class="media-row" aria-label="Media controls">
+                    <button type="button" data-command="rewind" data-requires-connection aria-label="Rewind">◀◀</button>
+                    <button type="button" data-command="play" data-requires-connection aria-label="Play">▶</button>
+                    <button type="button" data-command="pause" data-requires-connection aria-label="Pause">Ⅱ</button>
+                    <button type="button" data-command="stop" data-requires-connection aria-label="Stop">■</button>
+                    <button type="button" data-command="fast_forward" data-requires-connection aria-label="Fast forward">▶▶</button>
+                </div>
+
+                <details class="extended-remote">
+                    <summary>More remote keys</summary>
+                    <div class="compact-grid">
+                        <button type="button" data-command="info" data-requires-connection>Info</button>
+                        <button type="button" data-command="guide" data-requires-connection>Guide</button>
+                        <button type="button" data-command="list" data-requires-connection>List</button>
+                        <button type="button" data-command="menu" data-requires-connection>Menu</button>
+                        <button type="button" data-command="quick_menu" data-requires-connection>Quick menu</button>
+                        <button type="button" data-command="recent" data-requires-connection>Recent</button>
+                        <button type="button" data-command="my_apps" data-requires-connection>My apps</button>
+                        <button type="button" data-command="input_hub" data-requires-connection>Input hub</button>
+                        <button type="button" data-command="screen_remote" data-requires-connection>Screen remote</button>
+                        <button type="button" data-command="aspect_ratio" data-requires-connection>Aspect ratio</button>
+                        <button type="button" data-command="closed_captions" data-requires-connection>Captions</button>
+                        <button type="button" data-command="audio_description" data-requires-connection>Audio description</button>
+                        <button type="button" data-command="sap" data-requires-connection>SAP</button>
+                        <button type="button" data-command="teletext" data-requires-connection>Teletext</button>
+                        <button type="button" data-command="text_option" data-requires-connection>Text option</button>
+                        <button type="button" data-command="program" data-requires-connection>Program</button>
+                        <button type="button" data-command="record" data-requires-connection>Record</button>
+                        <button type="button" data-command="media_close" data-requires-connection>Close media</button>
+                        <button type="button" data-command="mute_toggle" data-requires-connection>Mute toggle</button>
+                        <button type="button" data-command="live_zoom" data-requires-connection>Live zoom</button>
+                        <button type="button" data-command="magnifier_zoom" data-requires-connection>Focus zoom</button>
+                        <button type="button" data-command="amazon" data-requires-connection>Amazon</button>
+                        <button type="button" data-command="netflix" data-requires-connection>Netflix</button>
+                        <button type="button" data-command="three_d_mode" data-requires-connection data-requires-3d>3D mode</button>
+                        <button class="power-button" type="button" data-command="power_toggle" data-requires-connection>Power toggle</button>
+                    </div>
+                </details>
+            </section>
+
+            <div class="side-panels">
+                <section class="panel" aria-labelledby="launch-title">
+                    <p class="eyebrow">Installed catalog</p>
+                    <h2 id="launch-title">Apps and inputs</h2>
+
+                    <label for="app-select">Application</label>
+                    <div class="field-row">
+                        <select id="app-select" data-requires-connection>
+                            <option value="">No applications loaded</option>
+                        </select>
+                        <button id="launch-button" type="button" data-requires-connection>Launch</button>
+                        <button id="close-app-button" type="button" data-requires-connection>Close</button>
+                    </div>
+
+                    <label for="input-select">Input</label>
+                    <div class="field-row">
+                        <select id="input-select" data-requires-connection>
+                            <option value="">No inputs loaded</option>
+                        </select>
+                        <button id="input-button" type="button" data-requires-connection>Switch</button>
+                    </div>
+
+                    <label for="channel-select">Channel</label>
+                    <div class="field-row">
+                        <select id="channel-select" data-requires-connection>
+                            <option value="">No channels loaded</option>
+                        </select>
+                        <button id="channel-button" type="button" data-requires-connection>Watch</button>
+                    </div>
+
+                    <label for="sound-output-select">Sound output</label>
+                    <div class="field-row">
+                        <select id="sound-output-select" data-requires-connection>
+                            <option value="tv_speaker">TV speaker</option>
+                            <option value="external_arc">HDMI ARC</option>
+                            <option value="external_optical">Optical</option>
+                            <option value="external_speaker">External speaker</option>
+                            <option value="bt_soundbar">Bluetooth</option>
+                            <option value="soundbar">Soundbar</option>
+                            <option value="lineout">Line out</option>
+                            <option value="headphone">Headphones</option>
+                            <option value="tv_external_speaker">TV + external speaker</option>
+                            <option value="tv_external_headphone">TV + headphones</option>
+                            <option value="tv_speaker_headphone">TV speaker + headphones</option>
+                            <option value="tv_speaker_bluetooth">TV speaker + Bluetooth</option>
+                            <option value="mobile_phone">Mobile phone</option>
+                            <option value="wisa_speaker">WiSA speaker</option>
+                        </select>
+                        <button id="sound-output-button" type="button" data-requires-connection>Use</button>
+                    </div>
+                </section>
+
+                <section class="panel" aria-labelledby="display-title">
+                    <p class="eyebrow">Display and message</p>
+                    <h2 id="display-title">TV screen</h2>
+                    <div class="quick-row">
+                        <button type="button" data-command="screen_off" data-requires-connection>Screen off</button>
+                        <button type="button" data-command="screen_on" data-requires-connection>Screen on</button>
+                    </div>
+                    <div id="three-d-controls" class="quick-row" hidden>
+                        <button type="button" data-three-d="true" data-requires-connection>3D on</button>
+                        <button type="button" data-three-d="false" data-requires-connection>3D off</button>
+                    </div>
+                    <form id="toast-form">
+                        <label for="toast-message">Notification</label>
+                        <div class="field-row">
+                            <input
+                                id="toast-message"
+                                name="message"
+                                type="text"
+                                minlength="1"
+                                maxlength="120"
+                                autocomplete="off"
+                                placeholder="Message shown on the TV"
+                                data-requires-connection
+                            >
+                            <button type="submit" data-requires-connection>Send</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </div>
+
+        <div class="advanced-grid">
+            <section class="panel" aria-labelledby="text-title">
+                <p class="eyebrow">Focused field</p>
+                <h2 id="text-title">Text input</h2>
+                <form id="text-form">
+                    <label for="text-value">Text</label>
+                    <input id="text-value" name="text" type="text" maxlength="500" autocomplete="off" required data-requires-connection>
+                    <label class="checkbox-label" for="text-replace">
+                        <input id="text-replace" type="checkbox" data-requires-connection>
+                        Replace existing text
+                    </label>
+                    <div class="quick-row">
+                        <button type="submit" data-requires-connection>Send text</button>
+                        <button id="text-delete-button" type="button" data-requires-connection>Delete</button>
+                        <button id="text-enter-button" type="button" data-requires-connection>Enter</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="panel" aria-labelledby="alert-title">
+                <p class="eyebrow">Modal notification</p>
+                <h2 id="alert-title">TV alert</h2>
+                <form id="alert-form">
+                    <label for="alert-message">Message</label>
+                    <input id="alert-message" name="message" type="text" maxlength="240" autocomplete="off" required data-requires-connection>
+                    <label for="alert-button-label">Button label</label>
+                    <input id="alert-button-label" name="button_label" type="text" maxlength="32" value="OK" autocomplete="off" required data-requires-connection>
+                    <div class="quick-row form-actions">
+                        <button type="submit" data-requires-connection>Show alert</button>
+                        <button id="close-alert-button" type="button" data-requires-connection>Dismiss</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="panel" aria-labelledby="services-title">
+                <p class="eyebrow">Read-only capability query</p>
+                <h2 id="services-title">Advertised services</h2>
+                <p id="services-summary" class="muted-copy">Connect to load the TV service catalog.</p>
+                <ul id="services-list" class="service-list"></ul>
+            </section>
+        </div>
+
+        <footer>
+            <span>Localhost only</span>
+            <span>WSS certificate pinned</span>
+            <span>Raw SSAP disabled</span>
+        </footer>
+    </main>
+</body>
+</html>
